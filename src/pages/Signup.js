@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { IonButton, IonCol, IonContent, IonInput, IonItem, IonLabel, IonLoading, IonPage, IonRow } from '@ionic/react';
-import NavHeader from '../components/Header/NavHeader';
+import { toast } from '../utils/toast';
 import useFormValidation from '../hooks/useFormValidation';
 import validateSignup from '../components/Auth/validateSignup'
-import { toast } from '../utils/toast';
+import firebase from '../firebase'
+import NavHeader from '../components/Header/NavHeader';
 
 const INITIAL_STATE = {
 	name: "",
@@ -21,16 +22,16 @@ const Signup = (props) => {
 
 	const [busy, setBusy] = useState(false)
 
-	const authenticateUser = async () => {
+	async function authenticateUser() {
 		setBusy(true)
 		const { name, email, password } = values
 		try {
-			await firebase.register(name, email, password)
-			toast("You have signed up successfully!")
-			props.history.push("/")
+		  await firebase.register(name, email, password)
+		  toast("You have signed up successfully!")
+		  props.history.push("/")
 		} catch (err) {
-			console.error("Authentication Error", err)
-			toast(err.message)
+		  console.error("Authentication Error", err)
+		  toast(err.message)
 		}
 		setBusy(false)
 	}
