@@ -1,9 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {IonButton, IonCol, IonContent, IonInput, IonItem, IonLabel, IonPage, IonRouterLink, IonRow} from '@ionic/react';
 import NavHeader from '../components/Header/NavHeader';
 import { toast } from '../utils/toast';
 import useFormValidation from '../hooks/useFormValidation';
-import validateSignup from '../components/Auth/validateSignup'
+import validateLogin from '../components/Auth/validateLogin'
 import firebase from '../firebase'
 
 const INITIAL_STATE = {
@@ -12,13 +12,12 @@ const INITIAL_STATE = {
 }
 
 const Login = (props) => {
-
 	const {
 		handleSubmit,
 		handleChange,
 		values,
 		isSubmitting
-	} = useFormValidation(INITIAL_STATE, validateSignup, authenticateUser)
+	} = useFormValidation(INITIAL_STATE, validateLogin, authenticateUser)
 
 	const [busy, setBusy] = useState(false)
 
