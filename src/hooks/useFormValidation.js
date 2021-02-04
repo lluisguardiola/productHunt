@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {toast} from '../utils/toast';
 
 const useFormValidation = (initialState, validate, action) => {
