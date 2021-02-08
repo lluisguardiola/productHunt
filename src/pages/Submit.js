@@ -8,6 +8,8 @@ import SmallHeader from "../components/Header/SmallHeader"
 import LargeHeader from "../components/Header/LargerHeader"
 import {toast} from '../utils/toast'
 
+import Upload from './components/Form/Upload'
+
 const INITIAL_STATE = {
 	title: "",
 	description: "",
@@ -17,6 +19,8 @@ const INITIAL_STATE = {
 const Submit = (props) => {
 	const {user} = useContext(UserContext)
 	const [submitting, setSubmitting] = useState(false)
+	const [thumb, setThumb] = useState([])
+	const [photos, setPhotos] = useState([])
 	const {handleSubmit, handleChange, values} = useFormValidation(
 		INITIAL_STATE,
 		validateCreateProduct,
@@ -36,6 +40,40 @@ const Submit = (props) => {
 			const {url, description, title} = values
 			const id = firebase.db.collection("products").doc().id
 
+			await Promise.all([
+				...thumb.map((f, index) =>
+				firebase.storage
+					.ref()
+					.child(`products/${id}_thumb_${index}.jpg`)
+					.put(f)
+				),
+
+				...photos.map((f, index) =>
+					firebase.storage
+						.ref()
+						.child(`products/${id}_photo_${index}.jpg`)
+						.put(f)
+				)
+			])
+
+			const productThumbs = await Promise.all(
+				thumb.map((f, index) => 
+					firebase.storage
+						.ref()
+						.child(`products/${id}_thumb_${index}.jpg`)
+						.getDownloadURL()
+				)
+			)
+
+			const productPhotos = await Promise.all(
+				photos.map((f, index) => 
+					firebase.storage
+						.ref()
+						.child(`products/${id}_photo_${index}.jpg`)
+						.getDownloadURL()
+				)
+			)
+
 			const newProduct = {
 				title,
 				url,
@@ -44,6 +82,8 @@ const Submit = (props) => {
 					id: user.uid,
 					name: user.displayName
 				},
+				thumbnail: productThumbs[0] || null,
+				photos: productPhotos,
 				voteCount: 1,
 				comments: [],
 				votes: [{
@@ -52,8 +92,12 @@ const Submit = (props) => {
 				created: Date.now()
 			}
 
+			setThumb([])
+			setPhotos([])
+
 			await firebase.db.collection("products").doc(id).set(newProduct)
 			props.history.push("/")
+		
 		} catch (err) {
 			console.error(err)
 			toast(err.message)
@@ -99,6 +143,28 @@ const Submit = (props) => {
 						required
 					/>
 				</IonItem>
+
+
+				<IonRow>
+					<IonCol>
+						<Upload
+							files={thumb}
+							onChange={setThumb}
+							placeholder="Select Thumbnail"
+						/>
+					</IonCol>
+				</IonRow>
+
+				<IonRow>
+					<IonCol>
+						<Upload
+							files={photos}
+							onChange={setPhotos}
+							placeholder="Select Photos"
+							multiple
+						/>
+					</IonCol>
+				</IonRow>
 
 				<IonRow>
 					<IonCol>
